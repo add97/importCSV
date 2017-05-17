@@ -1,0 +1,14 @@
+{
+  "name": "meteor-csv",
+  "version": "1.0.1",
+  "description": "Package for a script to import .csv contents into a database",
+  "main": "convert.js",
+  "scripts": {
+    "start": "meteor run",
+    "install-packages": "meteor --version && meteor npm install --save babel-runtime json-2-csv"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.23.0",
+    "json-2-csv": "^2.1.1"
+  }
+}
