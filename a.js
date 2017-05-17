@@ -1,6 +1,7 @@
 var fs = require('fs');
 var converter = require('json-2-csv');
 var DDPClient = require('ddp');
+var _ = require('underscore');
 var json;
 
 var ddpclient = new DDPClient({
@@ -42,50 +43,51 @@ function getDocuments() {
       console.log(`ran async`)
       if (err) { throw err; }
       json = json.map((obj) => {
-        yelp = typeof parseFloat(obj['Yelp Rating']) === 'number' ? parseFloat(obj['Yelp Rating']) : 0gs;
-        console.log(obj['Restaurants'], yelp);
-        return {
-          company_name: obj['Restaurants'] || obj.Restaurants,
-          company_address: obj['Street'] || obj.Street,
-          habitat: obj['Habitat'] || obj.Habitat,
-          platform_priority: obj['Platform Priority'],
+        console.log(`getDocuments map`, obj['Yelp Rating'])
+        result = {
+          company_name: obj.Restaurants || obj.Restaurants,
+          company_address: obj.Street || obj.Street,
+          habitat: obj.Habitat || obj.Habitat,
+          platform_priority: obj.PlatformPriority,
           company_type: obj['Vendor Type'],
           menu_difficulty: obj['Menu Difficulty'],
           status: obj['Sales Step'],
           eat24: obj['EAT 24'] === 'Y',
-          grubhub: obj['GRUBHUB'] === 'Y' || obj.GRUBHUB === 'Y',
+          grubhub: obj.GRUBHUB === 'Y' || obj.GRUBHUB === 'Y',
           reviews: obj['GH & Yelp Reviews'],
-          priority: obj['Priority'] || obj.Priority,
-          yelp_rating: yelp,
-          categories: obj['Cuisine'] || obj.Cuisine,
+          priority: obj.Priority || obj.Priority,
+          categories: obj.Cuisine || obj.Cuisine,
           hiring: obj['Outsourced vs. in house'],
           uberEats: obj['Uber Eats'] === 'Y',
-          postmates: obj['Postmates'] === 'Y' || obj.Postmates === 'Y',
-          caviar: obj['Caviar'] === 'Y' || obj.Caviar === 'Y',
-          catering: obj['Catering'] === 'Y' || obj.Catering === 'Y',
-          DaaS: obj['DaaS'] === 'Y' || obj.DaaS === 'Y',
+          postmates: obj.Postmates === 'Y' || obj.Postmates === 'Y',
+          caviar: obj.Caviar === 'Y' || obj.Caviar === 'Y',
+          catering: obj.Catering === 'Y' || obj.Catering === 'Y',
+          DaaS: obj.DaaS === 'Y' || obj.DaaS === 'Y',
           DaaSGH: obj['DaaS - GH'] === 'Y',
           notificationPreference: obj['Order Method'],
           serialNumber: obj['iPad Serial No.'],
           direct_deposit: obj['Direct Deposit'] === 'Y'
         };
+
+          if(obj['Yelp Rating'] && !_.isNaN(obj['Yelp Rating'])){
+            result.yelp_rating = parseFloat(obj['Yelp Rating']);
+            console.log(result.yelp_rating);
+          } else {
+            result.yelp_rating = 0;
+          }
+
+        return result;
       });
 
-      console.log(`${json.length} prospects`)
-
-
-
-      json.forEach((prospect) => {
-        console.log(`running on ${prospect.company_name}`);
+      count = json.length;
+      json.forEach((prospect, i) => {
+        console.log(i, i/ count, 'done');
+        console.log(`running on ${prospect.company_name}`, prospect.yelp_rating);
         ddpclient.call('Prospects.methods.create', [prospect], (err, result) => {
-          if (err) {
-            console.log(`ddp err`, err.reason)
-          }
-          // console.log(`ddp res`, result );
-          console.log('called function, result: ' + result);
+          // if (err) { console.log(`ddp err`, prospect.company_name, err.reason) }
           return;
         }, () => {
-          console.log('updated');
+          // console.log('updated', prospect.company_name);
           return;
         }
       );
