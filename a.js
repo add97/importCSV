@@ -42,7 +42,7 @@ function getDocuments() {
       console.log(`ran async`)
       if (err) { throw err; }
       json = json.map((obj) => {
-        yelp = typeof parseFloat(obj['Yelp Rating']) === 'number' ? parseFloat(obj['Yelp Rating']) : 0;
+        yelp = typeof parseFloat(obj['Yelp Rating']) === 'number' ? parseFloat(obj['Yelp Rating']) : 0gs;
         console.log(obj['Restaurants'], yelp);
         return {
           company_name: obj['Restaurants'] || obj.Restaurants,
